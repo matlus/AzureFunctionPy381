@@ -27,16 +27,17 @@ def ensure_required_headers(http_request_headers: HttpRequestHeaders) -> None:
         )
 
 
-@app.route(route="http_trigger")
-def http_trigger(req: func.HttpRequest, context: func.Context) -> HttpResponse:
+@app.route(route="raise_custom_exception", methods=["GET"])
+def raise_custom_exception(
+    req: func.HttpRequest, context: func.Context
+) -> HttpResponse:
     application_logger.log_information(
-        "http_trigger function processed a request.",
+        "raise_custom_exception function processed a request.",
         {"additionalData1": "Value1", "additionalData2": 43},
     )
 
     try:
         ensure_required_headers(req.headers)
-        # raise ValueError("There is a problem with the value")
         domain_facade.process_music_metadata("C:\\somefilepath.mp3")
         return func.HttpResponse("All good", status_code=200)
     except Exception as e:
@@ -46,6 +47,31 @@ def http_trigger(req: func.HttpRequest, context: func.Context) -> HttpResponse:
                 "FunctionName": context.function_name,
                 "SpanId": get_span_id(req.headers),
                 "invocationid": context.invocation_id,
+            },
+        )
+        return ExceptionToHttpResponseTranslator.translate(e, func.HttpResponse)
+
+
+@app.route(route="raise_unhandled_exception", methods=["GET"])
+def raise_unhandled_exception(
+    req: func.HttpRequest, context: func.Context
+) -> HttpResponse:
+    application_logger.log_information(
+        "raise_unhandled_exception function processed a request.",
+        {"additionalData3": "Value3", "additionalData4": 64},
+    )
+
+    try:
+        ensure_required_headers(req.headers)
+        raise ValueError("The Value for Payload is invalid.")
+    except Exception as e:
+        application_logger.log_exception(
+            e,
+            {
+                "FunctionName": context.function_name,
+                "SpanId": get_span_id(req.headers),
+                "invocationid": context.invocation_id,
+                "Payload": "Some payload data",
             },
         )
         return ExceptionToHttpResponseTranslator.translate(e, func.HttpResponse)
