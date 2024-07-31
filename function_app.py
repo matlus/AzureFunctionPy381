@@ -57,7 +57,7 @@ def raise_unhandled_exception(
     req: func.HttpRequest, context: func.Context
 ) -> HttpResponse:
     application_logger.log_information(
-        "raise_unhandled_exception function processed a request.",
+        "raise_unhandle_exception function processed a request.",
         {"additionalData3": "Value3", "additionalData4": 64},
     )
 

@@ -34,18 +34,16 @@ class ApplicationLogger:
         calling_function: str,
     ):
         exception.add_contextual_data(additional_context)
-        contextual_data: dict[str, dict[str, Any]] = {
-            self.CUSTOM_DIMENSIONS: exception.contextual_data
-        }
+
         self.logger.log(
             exception.severity,
             "Application Exception caught in function: '%s' - Message: %s. Contextual Information: %s",
             calling_function,
             exception,
-            exception.contextual_data,
+            exception.contextual_data[self.CUSTOM_DIMENSIONS],
             exc_info=exception,
             stack_info=True,
-            extra=contextual_data,
+            extra=exception.contextual_data,
         )
 
     def __log_unhandled_exception(
